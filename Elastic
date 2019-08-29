@@ -1,0 +1,50 @@
+try {
+elastic = (effect("Position - Stretch")("ADBE Slider Control-0001")) / 100;
+gravity = (effect("Position - Gravity")("ADBE Slider Control-0001")) * 100;
+bounceMax = effect("Position - Max Jumps")("ADBE Slider Control-0001");
+on_off = effect("Position - Jump In/Out")("ADBE Checkbox Control-0001");
+ 
+n = 0;
+if (numKeys > 0) {
+    n = nearestKey(time).index;
+    if (key(n).time > time) {
+        n--;
+    }
+}
+if (n > 0) {
+    t = time - key(n).time;
+    v = -velocityAtTime(key(n).time - 0.001) * elastic;
+    vl = length(v);
+    if (value instanceof Array) {
+        vu = (vl > 0) ? normalize(v) : [0, 0, 0];
+    } else {
+        vu = (v < 0) ? -1 : 1;
+    }
+    tCur = 0;
+    segDur = 2 * vl / gravity;
+    tNext = segDur;
+    numberOfBounces = 1;
+    while (tNext < t && numberOfBounces <= bounceMax) {
+        vl *= elastic;
+        segDur *= elastic;
+        tCur = tNext;
+        tNext += segDur;
+        numberOfBounces++;
+    }
+    if (numberOfBounces <= bounceMax) {
+        delta = t - tCur;
+        inOutExp = vu * delta * (vl - gravity * delta / 2);
+        if (on_off == 1) {
+            value = value - inOutExp;
+		} else {
+            value = value + inOutExp;
+		}
+	} else {
+        value = value;
+	}
+} else {
+    value = value;
+}
+} catch (e$$4) {
+value = value;
+}
